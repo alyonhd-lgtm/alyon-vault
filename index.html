@@ -599,11 +599,16 @@ function disegna(){
     if(modifica) strip.appendChild(bott("rtAdd", "+ Raid", nuovoRaid));
     pagina.appendChild(strip);
 
-    rifTot = el("b", {}); rifTotBar = el("i", {});
-    pagina.appendChild(el("p", {"class":"totale"}, [
-      el("span", {testo:"Complessivo"}), rifTot,
-      el("span", {"class":"totBar"}, [rifTotBar])
-    ]));
+    /* il complessivo ha senso solo se c'e' almeno un personaggio */
+    if(nPg > 0){
+      rifTot = el("b", {}); rifTotBar = el("i", {});
+      pagina.appendChild(el("p", {"class":"totale"}, [
+        el("span", {testo:"Complessivo"}), rifTot,
+        el("span", {"class":"totBar"}, [rifTotBar])
+      ]));
+    }else{
+      rifTot = null; rifTotBar = null;
+    }
   }
 
   /* --- account --- */
