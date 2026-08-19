@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0D0F14">
+<title>Alyon Vault L2</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icona-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icona-512.png">
+<link rel="apple-touch-icon" href="icona-192.png">
+<style id="stile">
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;padding:0}
+button,input{font:inherit;color:inherit;background:none;border:none;padding:0;margin:0}
+button{cursor:pointer;text-align:left}
+svg{display:block}
+h1,h2,p{margin:0}
+
+:root{
+  --fondo:#0D0F14;
+  --carta:#171B24;
+  --carta2:#1D222D;
+  --linea:#252C38;
+  --linea2:#333C4B;
+  --testo:#EAEEF5;
+  --tenue:#7E8BA0;
+  --acc:#22D3EE;
+  --rosso:#FB7185;
+  --verde:#A3E635;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Consolas,"Liberation Mono",Menlo,monospace;
+}
+body{
+  background:var(--fondo);color:var(--testo);font-family:var(--font);
+  font-size:15px;line-height:1.45;
+}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+
+.pagina{max-width:1320px;margin:0 auto;padding:22px 16px 60px}
+
+/* ---------- testata ---------- */
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-.03em;margin-right:auto}
+h1 em{font-style:normal;color:var(--acc)}
+.stato{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--tenue);
+  font-family:var(--mono);white-space:nowrap}
+.pallino{width:8px;height:8px;border-radius:50%;background:var(--verde);flex:none}
+.stato[data-s="attesa"] .pallino,.stato[data-s="corso"] .pallino{background:#FBBF24}
+.stato[data-s="errore"] .pallino{background:var(--rosso)}
+.stato[data-s="errore"]{color:var(--rosso)}
+
+.btn{
+  border:1px solid var(--linea2);border-radius:8px;padding:7px 13px;font-size:12.5px;
+  font-weight:600;letter-spacing:.01em;background:var(--carta);color:var(--testo);
+  transition:border-color .12s,color .12s,background .12s;white-space:nowrap;
+}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.on{border-color:var(--acc);color:#0D0F14;background:var(--acc)}
+.btn.pericolo[data-conferma="1"]{border-color:var(--rosso);color:var(--rosso)}
+.btn.mini{padding:5px 9px;font-size:11.5px}
+
+/* ---------- barra dei server ---------- */
+.srv{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:18px;
+  padding-bottom:14px;border-bottom:1px solid var(--linea)}
+.srvPill{
+  display:inline-flex;align-items:center;gap:7px;border:1px solid var(--linea2);
+  border-radius:99px;padding:6px 14px;font-size:13px;font-weight:600;
+  color:var(--tenue);background:var(--carta);transition:all .12s;
+}
+.srvPill:hover{color:var(--testo);border-color:var(--acc)}
+.srvPill[aria-current="true"]{color:#0D0F14;background:var(--acc);border-color:var(--acc)}
+.srvPill small{font-family:var(--mono);font-size:10.5px;font-weight:500;opacity:.75}
+.srvX{
+  border:1px dashed var(--linea2);border-radius:99px;width:30px;height:30px;
+  display:grid;place-items:center;color:var(--tenue);font-size:16px;line-height:1;
+  transition:all .12s;
+}
+.srvX:hover{border-color:var(--acc);color:var(--acc);border-style:solid}
+
+/* ---------- riepilogo raid ---------- */
+.raidStrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(154px,1fr));gap:10px;margin-bottom:13px}
+.rt{
+  background:var(--carta);border:1px solid var(--linea);border-radius:12px;
+  padding:11px 13px 12px;position:relative;overflow:hidden;
+}
+.rt::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:var(--h)}
+.rtTop{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.rtN{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--h);font-weight:800;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rtAz{margin-left:auto;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--tenue);
+  border:1px solid transparent;border-radius:5px;padding:2px 5px;flex:none;transition:all .12s}
+.rtAz:hover{color:var(--h);border-color:var(--linea2)}
+.rtAz[data-conferma="1"]{color:var(--rosso);border-color:var(--rosso)}
+.rtNum{font-size:25px;font-weight:800;letter-spacing:-.035em;line-height:1.1;font-variant-numeric:tabular-nums}
+.rtNum small{font-size:12px;font-weight:600;color:var(--tenue);letter-spacing:0}
+.rtBar{height:7px;border-radius:99px;background:#0B0D12;border:1px solid var(--linea);overflow:hidden;margin-top:7px}
+.rtBar i{display:block;height:100%;background:var(--h);box-shadow:0 0 10px var(--h);transition:width .2s}
+.rtAdd{
+  border:1px dashed var(--linea2);border-radius:12px;display:grid;place-items:center;
+  min-height:92px;color:var(--tenue);font-size:12.5px;font-weight:600;transition:all .12s;text-align:center;
+}
+.rtAdd:hover{border-color:var(--acc);color:var(--acc)}
+.rtFre{display:flex;gap:3px;margin-left:auto;flex:none}
+.rtFre button{width:20px;height:20px;border-radius:5px;border:1px solid var(--linea);
+  display:grid;place-items:center;color:var(--tenue);font-size:11px;line-height:1;transition:all .12s}
+.rtFre button:hover:not(:disabled){color:var(--acc);border-color:var(--acc)}
+.rtFre button:disabled{opacity:.28;cursor:default}
+.rtNome{flex:1 1 auto;min-width:0;text-align:left}
+.rtNome .rtN{display:block}
+.rtNome:hover .rtN{text-decoration:underline}
+
+.totale{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;
+  color:var(--tenue);margin:0 2px 20px}
+.totale b{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--testo);font-weight:700;font-size:13px}
+.totBar{flex:1 1 160px;height:7px;border-radius:99px;background:#0B0D12;border:1px solid var(--linea);overflow:hidden}
+.totBar i{display:block;height:100%;background:var(--acc);box-shadow:0 0 10px var(--acc);transition:width .2s}
+
+/* ---------- schede account ---------- */
+.griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
+.acc{background:var(--carta);border:1px solid var(--linea);border-radius:12px;overflow:hidden}
+.accTop{display:flex;align-items:center;gap:8px;padding:11px 13px;border-bottom:1px solid var(--linea)}
+.accCl{font-size:9px;letter-spacing:.15em;font-weight:800;color:#0D0F14;background:var(--verde);
+  border-radius:5px;padding:3px 7px;flex:none;text-transform:uppercase}
+.accN{font-size:14.5px;font-weight:700;letter-spacing:-.01em;min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.accC{margin-left:auto;font-size:11.5px;color:var(--tenue);font-weight:700;
+  font-variant-numeric:tabular-nums;flex:none}
+
+/* ---------- password dell'account ---------- */
+.pw{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--linea);
+  background:#12161D}
+.pwVal{
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;color:var(--tenue);
+  flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  user-select:all;-webkit-user-select:all;
+}
+.pwVal.vista{color:var(--testo);letter-spacing:.02em}
+.pwB{width:26px;height:24px;border-radius:6px;border:1px solid var(--linea);display:grid;
+  place-items:center;color:var(--tenue);flex:none;transition:all .12s}
+.pwB:hover{color:var(--acc);border-color:var(--acc)}
+.pwB svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.pwCp{font-size:9.5px;letter-spacing:.1em;font-weight:800;text-transform:uppercase;
+  color:var(--tenue);border:1px solid var(--linea);border-radius:6px;padding:5px 7px;
+  flex:none;transition:all .12s}
+.pwCp:hover{color:var(--acc);border-color:var(--acc)}
+.pwNota{font-size:11px;color:var(--tenue);padding:0 13px 8px;background:#12161D;
+  border-bottom:1px solid var(--linea)}
+
+.scroll{overflow-x:auto}
+.tab{display:grid;grid-template-columns:minmax(104px,1fr) repeat(var(--n),34px) auto;
+  align-items:center;min-width:min-content}
+.cH{font-size:8.5px;letter-spacing:.12em;font-weight:800;text-align:center;color:var(--h);
+  padding:9px 0 4px}
+.cH.nome{text-align:left;color:var(--tenue);padding-left:13px}
+.cNome{
+  position:sticky;left:0;z-index:2;background:var(--carta);
+  padding:5px 8px 5px 13px;font-size:13.5px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.cH.nome{position:sticky;left:0;z-index:2;background:var(--carta)}
+.cNome.ok{color:var(--verde);font-weight:700}
+.cNome:hover{color:var(--acc)}
+.cPal{display:grid;place-items:center;padding:5px 0}
+.pal{width:19px;height:19px;border-radius:50%;border:2px solid var(--linea2);background:transparent;
+  transition:border-color .12s,background .12s,box-shadow .12s,transform .08s}
+.pal:hover{border-color:var(--h)}
+.pal:active{transform:scale(.88)}
+.pal.on{border-color:var(--h);background:color-mix(in srgb,var(--h) 32%,transparent);
+  box-shadow:0 0 9px color-mix(in srgb,var(--h) 55%,transparent)}
+.cAz{display:flex;align-items:center;gap:4px;padding:5px 11px 5px 8px}
+.tutto{font-size:8.5px;letter-spacing:.1em;font-weight:800;color:var(--tenue);
+  border:1px solid var(--linea);border-radius:6px;padding:5px 7px;transition:all .12s}
+.tutto:hover{color:var(--acc);border-color:var(--acc)}
+.ico{width:24px;height:24px;border-radius:6px;border:1px solid var(--linea);display:grid;
+  place-items:center;color:var(--tenue);font-size:12px;line-height:1;flex:none;transition:all .12s}
+.ico:hover{color:var(--acc);border-color:var(--acc)}
+.ico.x:hover{color:var(--rosso);border-color:var(--rosso)}
+.addRiga{grid-column:1/-1;padding:7px 13px 11px}
+.addRiga button{font-size:11.5px;font-weight:600;color:var(--tenue);border:1px dashed var(--linea2);
+  border-radius:7px;padding:6px 11px;transition:all .12s}
+.addRiga button:hover{color:var(--acc);border-color:var(--acc)}
+.accAdd{border:1px dashed var(--linea2);border-radius:12px;display:grid;place-items:center;
+  min-height:120px;color:var(--tenue);font-size:13px;font-weight:600;transition:all .12s}
+.accAdd:hover{border-color:var(--acc);color:var(--acc)}
+
+/* ---------- modalita' modifica ---------- */
+.soloMod{display:none}
+[data-mod="1"] .soloMod{display:grid}
+[data-mod="1"] .soloModF{display:flex}
+[data-mod="1"] .noMod{display:none}
+.soloModF{display:none}
+
+/* ---------- vuoti, avvisi, note ---------- */
+.vuoto{border:1px dashed var(--linea2);border-radius:12px;padding:26px 20px;text-align:center;
+  color:var(--tenue);font-size:13.5px;margin-bottom:20px}
+.vuoto b{display:block;color:var(--testo);font-size:15px;margin-bottom:4px}
+.avviso{border:1px solid var(--rosso);border-radius:10px;padding:11px 14px;margin-bottom:16px;
+  background:color-mix(in srgb,var(--rosso) 12%,var(--carta));font-size:13px}
+.avviso b{display:block;margin-bottom:2px}
+.piede{margin-top:30px;padding-top:18px;border-top:1px solid var(--linea);
+  display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.piede p{font-size:12px;color:var(--tenue);max-width:64ch;flex:1 1 260px}
+
+/* ---------- finestrella ---------- */
+.velo{position:fixed;inset:0;background:rgba(6,8,12,.72);display:grid;place-items:center;
+  padding:18px;z-index:50}
+.dlg{background:var(--carta);border:1px solid var(--linea2);border-radius:14px;padding:18px;
+  width:100%;max-width:400px;box-shadow:0 30px 70px -20px rgba(0,0,0,.9)}
+.dlg h3{margin:0 0 3px;font-size:16.5px;font-weight:700;letter-spacing:-.01em}
+.dlg .sub{font-size:12.5px;color:var(--tenue);margin-bottom:14px}
+.campo{margin-bottom:11px}
+.campo label{display:block;font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--tenue);font-weight:700;margin-bottom:5px}
+.campo input{width:100%;background:#0B0D12;border:1px solid var(--linea2);border-radius:8px;
+  padding:9px 11px;font-size:14px;color:var(--testo)}
+.campo input:focus{outline:none;border-color:var(--acc)}
+.swatch{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid transparent;background:var(--c);
+  transition:transform .1s}
+.sw[aria-pressed="true"]{border-color:var(--testo);transform:scale(1.12)}
+.dlgAz{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;align-items:center}
+.dlgAz .btn.pri{border-color:var(--acc);background:var(--acc);color:#0D0F14}
+.dlgAz .btn.dan{border-color:var(--rosso);background:var(--rosso);color:#0D0F14}
+.dlgAz .elim{margin-right:auto;font-size:12.5px;font-weight:600;color:var(--rosso);
+  border:1px solid transparent;border-radius:8px;padding:7px 10px;transition:all .12s}
+.dlgAz .elim:hover{border-color:var(--rosso)}
+.dlgNota{font-size:11.5px;color:var(--tenue);margin:-4px 0 12px;line-height:1.4}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="fileIn" accept="application/json,.json" hidden>
+
+<script id="dati" type="application/json">{"v":2,"attivo":"sv1","server":[{"id":"sv1","nome":"Kain","raid":[{"id":"rd3","nome":"Zaken","c":2},{"id":"rd1","nome":"Freya","c":0},{"id":"rd2","nome":"Frintezza","c":1},{"id":"rd4","nome":"Tiat","c":3}],"account":[{"id":"ac1","nome":"UltimaEva","classe":"SOS","pg":[{"id":"pg01","nome":"Ryu"},{"id":"pg02","nome":"Ly"},{"id":"pg03","nome":"PR"},{"id":"pg04","nome":"Dr"},{"id":"pg05","nome":"Gr"}]},{"id":"ac2","nome":"UltimaDuelist","classe":"DD","pg":[{"id":"pg06","nome":"King"},{"id":"pg07","nome":"Guy"},{"id":"pg08","nome":"Fujy"},{"id":"pg09","nome":"Key"},{"id":"pg10","nome":"Hestia"}]},{"id":"ac3","nome":"UltimaSph","classe":"DD","pg":[{"id":"pg11","nome":"Everton"},{"id":"pg12","nome":"PvP"},{"id":"pg13","nome":"Yu"},{"id":"pg14","nome":"Valefor"},{"id":"pg15","nome":"Ko"}]},{"id":"ac4","nome":"OmegaMark","classe":"DD","pg":[{"id":"pg16","nome":"ShinraTensei"},{"id":"pg17","nome":"Ku"},{"id":"pg18","nome":"God"},{"id":"pg19","nome":"Gea"},{"id":"pg20","nome":"Anima"}]},{"id":"ac5","nome":"Omegahealer","classe":"HEALER","pg":[{"id":"pg21","nome":"Lei"},{"id":"pg22","nome":"Sole"},{"id":"pg23","nome":"Figa"},{"id":"pg24","nome":"Zey"},{"id":"pg25","nome":"Solei"}]},{"id":"ac6","nome":"OmegaDod","classe":"DOD","pg":[{"id":"pg26","nome":"Veldra"},{"id":"pg27","nome":"Divine"},{"id":"pg28","nome":"Sure"},{"id":"pg29","nome":"Asu"},{"id":"pg30","nome":"Sio"}]},{"id":"ac7","nome":"OmegaJudi","classe":"JUDI","pg":[{"id":"pg31","nome":"Jody"},{"id":"pg32","nome":"Kody"},{"id":"pg33","nome":"Lok"},{"id":"pg34","nome":"Tuk"},{"id":"pg35","nome":"Frey"}]}],"fatte":["pg01|rd1","pg01|rd2","pg01|rd3","pg01|rd4","pg09|rd1","pg09|rd2","pg09|rd3","pg09|rd4","pg16|rd1","pg16|rd2","pg16|rd3","pg16|rd4","pg25|rd1","pg25|rd2","pg25|rd3","pg25|rd4","pg26|rd1","pg26|rd2","pg26|rd3","pg26|rd4","pg33|rd1","pg33|rd2","pg33|rd3","pg33|rd4"]}]}</script>
+
+<script id="codice">
+(function(){
+"use strict";
+
+var CHIAVE = "raid-board-v2";
+var CHIAVE_VECCHIA = "kain-raid-board-v1";
+
+var COLORI = ["#22D3EE","#A855F7","#FB7185","#A3E635","#FBBF24",
+              "#38BDF8","#34D399","#E879F9","#FB923C","#818CF8"];
+
+var M = null;          /* il modello */
+var F = new Set();     /* spunte del server attivo */
+var modifica = false;
+var modo = "locale";   /* "online" oppure "locale" */
+
+/* ============================ modello ============================ */
+function nid(p){ return p + Math.random().toString(36).slice(2,8); }
+
+function modelloVuoto(){
+  return {v:2, attivo:"sv1", server:[{id:"sv1", nome:"Nuovo server", raid:[], account:[], fatte:[]}]};
+}
+
+function valido(o){
+  return o && o.v === 2 && Array.isArray(o.server) && o.server.length > 0;
+}
+
+function daScriptDati(){
+  try{
+    var o = JSON.parse(document.getElementById("dati").textContent || "null");
+    if(valido(o)) return o;
+  }catch(e){}
+  return null;
+}
+
+/* porta dentro i dati del vecchio file locale, se ci sono */
+function migraVecchio(seme){
+  var grezzo;
+  try{ grezzo = localStorage.getItem(CHIAVE_VECCHIA); }catch(e){ return null; }
+  if(!grezzo) return null;
+  var o;
+  try{ o = JSON.parse(grezzo); }catch(e){ return null; }
+  var lista = (o && Array.isArray(o.spunte)) ? o.spunte : (Array.isArray(o) ? o : null);
+  if(!lista || !seme || !seme.server[0]) return null;
+
+  var s = seme.server[0];
+  var perNome = {};   /* "Account/Pg" -> pgId */
+  s.account.forEach(function(a){
+    a.pg.forEach(function(p){ perNome[a.nome + "/" + p.nome] = p.id; });
+  });
+  var perRaid = {};   /* nome minuscolo -> raidId */
+  s.raid.forEach(function(r){ perRaid[r.nome.toLowerCase()] = r.id; });
+
+  var portate = [];
+  lista.forEach(function(k){
+    var t = String(k).split("|");
+    if(t.length !== 2) return;
+    var pg = perNome[t[0]], rd = perRaid[t[1]];
+    if(pg && rd) portate.push(pg + "|" + rd);
+  });
+  if(!portate.length) return null;
+  s.fatte = portate;
+  return seme;
+}
+
+function srv(){
+  var s = null;
+  M.server.forEach(function(x){ if(x.id === M.attivo) s = x; });
+  if(!s){ s = M.server[0]; M.attivo = s.id; }
+  return s;
+}
+function caricaF(){ F = new Set(srv().fatte || []); }
+function versaF(){ srv().fatte = Array.from(F).sort(); }
+function k(pgId, rdId){ return pgId + "|" + rdId; }
+function tuttiPg(s){
+  var out = [];
+  s.account.forEach(function(a){ a.pg.forEach(function(p){ out.push(p); }); });
+  return out;
+}
+function colore(r){ return COLORI[(r.c|0) % COLORI.length]; }
+function sigla(nome){
+  var t = String(nome).replace(/[^\p{L}\p{N}]/gu, "");
+  return (t.slice(0,3) || "?").toUpperCase();
+}
+
+/* ============================ utilita' DOM ============================ */
+function el(tag, attr, figli){
+  var n = document.createElement(tag);
+  if(attr){
+    for(var a in attr){
+      if(!Object.prototype.hasOwnProperty.call(attr, a)) continue;
+      if(a === "testo") n.textContent = attr[a];
+      else if(a === "html") n.innerHTML = attr[a];
+      else if(a.slice(0,2) === "--") n.style.setProperty(a, attr[a]);
+      else if(attr[a] !== null && attr[a] !== undefined) n.setAttribute(a, attr[a]);
+    }
+  }
+  if(figli) figli.forEach(function(f){ if(f) n.appendChild(f); });
+  return n;
+}
+function bott(cls, testo, onClick, extra){
+  var b = el("button", Object.assign({"class":cls, type:"button", testo:testo}, extra || {}));
+  b.addEventListener("click", onClick);
+  return b;
+}
+
+/* ============================ password ============================ */
+var NS_SVG = "http://www.w3.org/2000/svg";
+function occhio(aperto){
+  var s = document.createElementNS(NS_SVG, "svg");
+  s.setAttribute("viewBox", "0 0 20 20");
+  s.setAttribute("aria-hidden", "true");
+  var p = document.createElementNS(NS_SVG, "path");
+  p.setAttribute("d", "M1.6 10S4.7 4.6 10 4.6 18.4 10 18.4 10 15.3 15.4 10 15.4 1.6 10 1.6 10Z");
+  s.appendChild(p);
+  var c = document.createElementNS(NS_SVG, "circle");
+  c.setAttribute("cx", "10"); c.setAttribute("cy", "10"); c.setAttribute("r", "2.7");
+  s.appendChild(c);
+  if(!aperto){
+    var l = document.createElementNS(NS_SVG, "path");
+    l.setAttribute("d", "M3.6 3.6 16.4 16.4");
+    s.appendChild(l);
+  }
+  return s;
+}
+
+function strisciaPassword(a){
+  var punti = new Array(Math.min(Math.max(a.pw.length, 8), 14) + 1).join("\u2022");
+  var val = el("span", {"class":"pwVal", testo:punti});
+  var visibile = false, timer = null;
+
+  var occ = el("button", {"class":"pwB", type:"button"});
+  function mostra(v){
+    visibile = v;
+    val.textContent = v ? a.pw : punti;
+    val.classList.toggle("vista", v);
+    occ.textContent = "";
+    occ.appendChild(occhio(v));
+    var et = v ? "Nascondi la password" : "Mostra la password";
+    occ.setAttribute("aria-pressed", v ? "true" : "false");
+    occ.setAttribute("aria-label", et);
+    occ.setAttribute("title", et);
+    clearTimeout(timer);
+    /* si richiude da sola: non resta in chiaro sullo schermo */
+    if(v) timer = setTimeout(function(){ mostra(false); }, 20000);
+  }
+  occ.addEventListener("click", function(){ mostra(!visibile); });
+  mostra(false);
+
+  var cp = bott("pwCp", "copia", function(){
+    function ripiego(){
+      mostra(true);
+      try{
+        var r = document.createRange();
+        r.selectNodeContents(val);
+        var sel = window.getSelection();
+        sel.removeAllRanges(); sel.addRange(r);
+      }catch(e){}
+      cp.textContent = "copia a mano";
+      setTimeout(function(){ cp.textContent = "copia"; }, 2600);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(a.pw).then(function(){
+        cp.textContent = "copiata";
+        setTimeout(function(){ cp.textContent = "copia"; }, 1800);
+      })["catch"](ripiego);
+    }else ripiego();
+  }, {"aria-label":"Copia la password di " + a.nome});
+
+  return el("div", {"class":"pw"}, [val, occ, cp]);
+}
+
+/* ============================ finestrella ============================ */
+function apriModale(o){
+  var velo = el("div", {"class":"velo"});
+  var dlg = el("div", {"class":"dlg", role:"dialog", "aria-modal":"true"});
+  dlg.appendChild(el("h3", {testo:o.titolo}));
+  if(o.sub) dlg.appendChild(el("p", {"class":"sub", testo:o.sub}));
+
+  var inputs = [];
+  (o.campi || []).forEach(function(c){
+    var inp = el("input", {type:"text", value:c.valore || "", placeholder:c.placeholder || "",
+                           maxlength:"40", spellcheck:"false"});
+    inputs.push({chiave:c.chiave, nodo:inp});
+    dlg.appendChild(el("div", {"class":"campo"}, [el("label", {testo:c.etichetta}), inp]));
+  });
+
+  var coloreScelto = o.colore;
+  if(o.colore !== undefined && o.colore !== null){
+    var riga = el("div", {"class":"swatch"});
+    COLORI.forEach(function(c, i){
+      var s = el("button", {"class":"sw", type:"button", "--c":c,
+                            "aria-pressed": i === coloreScelto ? "true" : "false",
+                            "aria-label":"Colore " + (i+1)});
+      s.addEventListener("click", function(){
+        coloreScelto = i;
+        riga.querySelectorAll(".sw").forEach(function(x, j){
+          x.setAttribute("aria-pressed", j === i ? "true" : "false");
+        });
+      });
+      riga.appendChild(s);
+    });
+    dlg.appendChild(el("div", {"class":"campo"}, [el("label", {testo:"Colore"})]));
+    dlg.appendChild(riga);
+  }
+
+  function chiudi(){
+    document.removeEventListener("keydown", tasti);
+    velo.remove();
+  }
+  function conferma(){
+    var vals = {colore:coloreScelto};
+    var vuoto = false;
+    inputs.forEach(function(i){
+      var v = i.nodo.value.trim();
+      if(!v) vuoto = true;
+      vals[i.chiave] = v;
+    });
+    if(vuoto && !o.permettiVuoto){ if(inputs[0]) inputs[0].nodo.focus(); return; }
+    chiudi();
+    o.onOk(vals);
+  }
+  function tasti(ev){
+    if(ev.key === "Escape"){ ev.preventDefault(); chiudi(); }
+    else if(ev.key === "Enter" && inputs.length){ ev.preventDefault(); conferma(); }
+  }
+
+  if(o.nota) dlg.appendChild(el("p", {"class":"dlgNota", testo:o.nota}));
+
+  var azioni = el("div", {"class":"dlgAz"});
+  if(o.elimina){
+    azioni.appendChild(bott("elim", "Elimina", function(){ chiudi(); o.elimina(); }));
+  }
+  azioni.appendChild(bott("btn", "Annulla", chiudi));
+  azioni.appendChild(bott("btn " + (o.distruttivo ? "dan" : "pri"), o.ok || "Salva", conferma));
+  dlg.appendChild(azioni);
+
+  velo.appendChild(dlg);
+  velo.addEventListener("click", function(ev){ if(ev.target === velo) chiudi(); });
+  document.addEventListener("keydown", tasti);
+  document.body.appendChild(velo);
+  if(inputs[0]){ inputs[0].nodo.focus(); inputs[0].nodo.select(); }
+}
+
+/* ============================ disegno ============================ */
+var rifTile = {};   /* raidId -> {num, bar} */
+var rifAcc = {};    /* accId -> nodo conteggio */
+var rifNome = {};   /* pgId -> nodo nome */
+var rifTot = null, rifTotBar = null;
+var nodoStato, nodoStatoTesto, nodoAvviso;
+
+function disegna(){
+  var app = document.getElementById("app");
+  var scrollPrima = window.scrollY;
+  app.textContent = "";
+  rifTile = {}; rifAcc = {}; rifNome = {};
+
+  var s = srv();
+  var pagina = el("div", {"class":"pagina", "data-mod": modifica ? "1" : "0"});
+
+  /* --- testata --- */
+  nodoStatoTesto = el("span", {testo: modo === "online" ? "Salvato" : "Salvato qui"});
+  nodoStato = el("span", {"class":"stato", role:"status", "aria-live":"polite"},
+                 [el("span", {"class":"pallino"}), nodoStatoTesto]);
+
+  var bSett = bott("btn pericolo", "Nuova settimana", function(){
+    confermaDoppia(bSett, "Nuova settimana", "Azzero?", function(){
+      F.clear(); versaF(); disegna(); salva();
+    });
+  });
+  var bMod = bott("btn" + (modifica ? " on" : ""), modifica ? "Fine" : "Modifica", function(){
+    modifica = !modifica; disegna();
+  });
+
+  pagina.appendChild(el("div", {"class":"top"}, [
+    el("h1", {}, [document.createTextNode("Alyon Vault "), el("em", {testo:"L2"})]),
+    nodoStato, bSett, bMod
+  ]));
+
+  /* --- server --- */
+  var barra = el("div", {"class":"srv"});
+  M.server.forEach(function(x){
+    var attivo = x.id === M.attivo;
+    var p = el("button", {"class":"srvPill", type:"button",
+                          "aria-current": attivo ? "true" : "false"});
+    p.appendChild(document.createTextNode(x.nome));
+    p.appendChild(el("small", {testo: x.account.reduce(function(n,a){return n+a.pg.length;},0) + " pg"}));
+    p.addEventListener("click", function(){
+      if(attivo && modifica){ rinominaServer(x); return; }
+      if(attivo) return;
+      M.attivo = x.id; caricaF(); disegna(); salva();
+    });
+    barra.appendChild(p);
+  });
+  barra.appendChild(bott("srvX", "+", nuovoServer, {title:"Nuovo server", "aria-label":"Nuovo server"}));
+  if(modifica){
+    barra.appendChild(el("span", {"class":"stato",
+      testo:"tocca il server attivo per rinominarlo"}));
+  }
+  pagina.appendChild(barra);
+
+  nodoAvviso = el("div", {"class":"avviso", hidden:"hidden"});
+  pagina.appendChild(nodoAvviso);
+
+  var pgs = tuttiPg(s);
+  var nPg = pgs.length, nRd = s.raid.length;
+
+  /* --- riepilogo raid --- */
+  if(nRd === 0){
+    pagina.appendChild(el("div", {"class":"vuoto"}, [
+      el("b", {testo:"Nessun raid su " + s.nome}),
+      el("span", {testo:"Aggiungi il primo raid: sara' una colonna per ogni personaggio."}),
+      el("div", {style:"margin-top:12px"}, [bott("btn", "+ Aggiungi raid", nuovoRaid)])
+    ]));
+  }else{
+    var strip = el("div", {"class":"raidStrip"});
+    s.raid.forEach(function(r){
+      var col = colore(r);
+      var num = el("span", {});
+      var bar = el("i", {});
+      var top = el("div", {"class":"rtTop"});
+
+      if(modifica){
+        var apri = bott("rtNome", "", function(){ modificaRaid(r); },
+                        {title:"Modifica " + r.nome});
+        apri.appendChild(el("span", {"class":"rtN", testo:r.nome}));
+        top.appendChild(apri);
+
+        var i = s.raid.indexOf(r);
+        var frecce = el("div", {"class":"rtFre"});
+        var giu = bott("", "<", function(){ spostaRaid(r, -1); },
+                       {"aria-label":"Sposta " + r.nome + " a sinistra"});
+        var su = bott("", ">", function(){ spostaRaid(r, 1); },
+                      {"aria-label":"Sposta " + r.nome + " a destra"});
+        if(i === 0) giu.disabled = true;
+        if(i === s.raid.length - 1) su.disabled = true;
+        frecce.appendChild(giu); frecce.appendChild(su);
+        top.appendChild(frecce);
+      }else{
+        top.appendChild(el("span", {"class":"rtN", testo:r.nome, title:r.nome}));
+        var az = bott("rtAz", "azzera", function(){
+          confermaDoppia(az, "azzera", "sicuro?", function(){
+            Array.from(F).forEach(function(x){
+              if(x.slice(x.indexOf("|") + 1) === r.id) F["delete"](x);
+            });
+            versaF(); disegna(); salva();
+          });
+        }, {"aria-label":"Azzera le spunte di " + r.nome});
+        top.appendChild(az);
+      }
+
+      var t = el("div", {"class":"rt", "--h":col}, [
+        top,
+        el("div", {"class":"rtNum"}, [num, el("small", {testo:"/" + nPg})]),
+        el("div", {"class":"rtBar"}, [bar])
+      ]);
+      rifTile[r.id] = {num:num, bar:bar};
+      strip.appendChild(t);
+    });
+    if(modifica) strip.appendChild(bott("rtAdd", "+ Raid", nuovoRaid));
+    pagina.appendChild(strip);
+
+    rifTot = el("b", {}); rifTotBar = el("i", {});
+    pagina.appendChild(el("p", {"class":"totale"}, [
+      el("span", {testo:"Complessivo"}), rifTot,
+      el("span", {"class":"totBar"}, [rifTotBar])
+    ]));
+  }
+
+  /* --- account --- */
+  if(s.account.length === 0){
+    pagina.appendChild(el("div", {"class":"vuoto"}, [
+      el("b", {testo:"Nessun account su " + s.nome}),
+      el("span", {testo:"Aggiungi un account e i personaggi che ci tieni dentro."}),
+      el("div", {style:"margin-top:12px"}, [bott("btn", "+ Aggiungi account", nuovoAccount)])
+    ]));
+  }else{
+    var griglia = el("div", {"class":"griglia"});
+    s.account.forEach(function(a){ griglia.appendChild(scheda(a, s)); });
+    if(modifica) griglia.appendChild(bott("accAdd", "+ Account", nuovoAccount));
+    pagina.appendChild(griglia);
+  }
+
+  /* --- piede --- */
+  pagina.appendChild(el("div", {"class":"piede"}, [
+    el("p", {testo: modo === "online"
+      ? "Questa board vive online: le spunte si salvano nella pagina e le ritrovi da qualsiasi dispositivo."
+      : "Questa copia e' locale: le spunte restano nel browser di questo dispositivo. Usa Salva copia per portarle altrove."}),
+    bott("btn mini", "Salva copia", esporta),
+    bott("btn mini", "Carica copia", function(){ document.getElementById("fileIn").click(); })
+  ]));
+
+  app.appendChild(pagina);
+  aggiornaNumeri();
+  window.scrollTo(0, scrollPrima);
+}
+
+function scheda(a, s){
+  var nRd = s.raid.length;
+  var card = el("section", {"class":"acc"});
+
+  var conta = el("span", {"class":"accC"});
+  rifAcc[a.id] = conta;
+  var top = el("div", {"class":"accTop"}, [
+    el("span", {"class":"accCl", testo:a.classe || "\u2014"}),
+    el("h2", {"class":"accN", testo:a.nome, title:a.nome}),
+    conta
+  ]);
+  if(modifica){
+    top.appendChild(bott("ico", "\u270E", function(){ rinominaAccount(a); },
+                         {title:"Modifica account", "aria-label":"Modifica " + a.nome}));
+  }
+  card.appendChild(top);
+
+  if(a.pw) card.appendChild(strisciaPassword(a));
+  else if(modifica){
+    card.appendChild(el("p", {"class":"pwNota",
+      testo:"Nessuna password: aggiungila dalla matita qui sopra."}));
+  }
+
+  var tab = el("div", {"class":"tab", "--n":String(nRd)});
+
+  /* intestazione colonne */
+  tab.appendChild(el("div", {"class":"cH nome", testo:"Personaggio"}));
+  s.raid.forEach(function(r){
+    tab.appendChild(el("div", {"class":"cH", "--h":colore(r), testo:sigla(r.nome), title:r.nome}));
+  });
+  tab.appendChild(el("div", {"class":"cH"}));
+
+  /* righe */
+  a.pg.forEach(function(p){
+    var nome = el("button", {"class":"cNome", type:"button", testo:p.nome, title:p.nome});
+    nome.addEventListener("click", function(){
+      if(modifica) rinominaPg(a, p); else commutaTutti(p, s);
+    });
+    rifNome[p.id] = nome;
+    tab.appendChild(nome);
+
+    s.raid.forEach(function(r){
+      var cella = el("div", {"class":"cPal"});
+      var b = el("button", {"class":"pal" + (F.has(k(p.id,r.id)) ? " on" : ""), type:"button",
+                            "--h":colore(r), "data-k":k(p.id,r.id), "data-rd":r.id,
+                            "aria-pressed": F.has(k(p.id,r.id)) ? "true" : "false",
+                            "aria-label":p.nome + ", " + r.nome});
+      b.addEventListener("click", function(){ commuta(b, p, r, s); });
+      cella.appendChild(b);
+      tab.appendChild(cella);
+    });
+
+    var az = el("div", {"class":"cAz"});
+    if(modifica){
+      /* niente: il nome del personaggio apre la finestrella con dentro Elimina */
+    }else if(nRd > 0){
+      az.appendChild(bott("tutto", "TUTTO", function(){ commutaTutti(p, s); },
+                          {"aria-label":"Tutti i raid di " + p.nome}));
+    }
+    tab.appendChild(az);
+  });
+
+  if(modifica){
+    tab.appendChild(el("div", {"class":"addRiga"}, [
+      bott("", "+ Personaggio", function(){ nuovoPg(a); })
+    ]));
+  }
+
+  card.appendChild(el("div", {"class":"scroll"}, [tab]));
+  return card;
+}
+
+/* ============================ spunte ============================ */
+function commuta(b, p, r, s){
+  var key = k(p.id, r.id);
+  if(F.has(key)) F["delete"](key); else F.add(key);
+  var on = F.has(key);
+  b.classList.toggle("on", on);
+  b.setAttribute("aria-pressed", on ? "true" : "false");
+  versaF(); aggiornaNumeri(); salva();
+}
+
+function commutaTutti(p, s){
+  if(!s.raid.length) return;
+  var chiavi = s.raid.map(function(r){ return k(p.id, r.id); });
+  var pieno = chiavi.every(function(x){ return F.has(x); });
+  chiavi.forEach(function(x){ if(pieno) F["delete"](x); else F.add(x); });
+  chiavi.forEach(function(x){
+    var b = document.querySelector('.pal[data-k="' + x + '"]');
+    if(b){ b.classList.toggle("on", F.has(x)); b.setAttribute("aria-pressed", F.has(x) ? "true":"false"); }
+  });
+  versaF(); aggiornaNumeri(); salva();
+}
+
+function aggiornaNumeri(){
+  var s = srv();
+  var pgs = tuttiPg(s), nPg = pgs.length, nRd = s.raid.length;
+  var totale = 0;
+
+  s.raid.forEach(function(r){
+    var n = 0;
+    pgs.forEach(function(p){ if(F.has(k(p.id, r.id))) n++; });
+    totale += n;
+    var t = rifTile[r.id];
+    if(t){
+      t.num.textContent = String(n);
+      t.bar.style.width = nPg ? (n / nPg * 100).toFixed(1) + "%" : "0%";
+    }
+  });
+
+  s.account.forEach(function(a){
+    var n = 0, max = a.pg.length * nRd;
+    a.pg.forEach(function(p){
+      var pieni = 0;
+      s.raid.forEach(function(r){ if(F.has(k(p.id, r.id))){ n++; pieni++; } });
+      var nn = rifNome[p.id];
+      if(nn) nn.classList.toggle("ok", nRd > 0 && pieni === nRd);
+    });
+    if(rifAcc[a.id]) rifAcc[a.id].textContent = n + "/" + max;
+  });
+
+  var max = nPg * nRd;
+  if(rifTot){
+    rifTot.textContent = totale + " / " + max;
+    rifTotBar.style.width = max ? (totale / max * 100).toFixed(1) + "%" : "0%";
+  }
+}
+
+function confermaDoppia(b, normale, conferma, azione){
+  if(b.getAttribute("data-conferma") === "1"){
+    b.removeAttribute("data-conferma"); b.textContent = normale;
+    clearTimeout(b._t); azione(); return;
+  }
+  b.setAttribute("data-conferma", "1"); b.textContent = conferma;
+  clearTimeout(b._t);
+  b._t = setTimeout(function(){
+    b.removeAttribute("data-conferma"); b.textContent = normale;
+  }, 4000);
+}
+
+/* ============================ modifiche struttura ============================ */
+function nuovoServer(){
+  apriModale({titolo:"Nuovo server", campi:[{chiave:"nome", etichetta:"Nome del server",
+    valore:"", placeholder:"per esempio Chronos"}], ok:"Crea", onOk:function(v){
+    var s = {id:nid("sv"), nome:v.nome, raid:[], account:[], fatte:[]};
+    M.server.push(s); M.attivo = s.id; caricaF(); modifica = true; disegna(); salva();
+  }});
+}
+function rinominaServer(x){
+  apriModale({titolo:"Server", campi:[{chiave:"nome", etichetta:"Nome", valore:x.nome}],
+    elimina: M.server.length > 1 ? function(){ eliminaServer(x); } : null,
+    onOk:function(v){ x.nome = v.nome; disegna(); salva(); }});
+}
+function eliminaServer(x){
+  apriModale({titolo:"Elimino " + x.nome + "?",
+    sub:"Spariscono i suoi " + x.account.length + " account e tutte le spunte. Non si torna indietro.",
+    ok:"Elimina", distruttivo:true, onOk:function(){
+      M.server = M.server.filter(function(y){ return y.id !== x.id; });
+      if(M.attivo === x.id) M.attivo = M.server[0].id;
+      caricaF(); disegna(); salva();
+    }});
+}
+
+function nuovoRaid(){
+  var s = srv();
+  apriModale({titolo:"Nuovo raid", sub:"Diventa una colonna per ogni personaggio di " + s.nome + ".",
+    campi:[{chiave:"nome", etichetta:"Nome del raid", placeholder:"per esempio Baium"}],
+    colore:s.raid.length % COLORI.length, ok:"Crea", onOk:function(v){
+      s.raid.push({id:nid("rd"), nome:v.nome, c:v.colore});
+      disegna(); salva();
+    }});
+}
+function modificaRaid(r){
+  apriModale({titolo:"Raid", campi:[{chiave:"nome", etichetta:"Nome", valore:r.nome}],
+    colore:(r.c|0) % COLORI.length,
+    elimina:function(){ eliminaRaid(r); },
+    onOk:function(v){
+      r.nome = v.nome; r.c = v.colore; disegna(); salva();
+    }});
+}
+function spostaRaid(r, verso){
+  var s = srv(), i = s.raid.indexOf(r), j = i + verso;
+  if(i < 0 || j < 0 || j >= s.raid.length) return;
+  s.raid.splice(i, 1);
+  s.raid.splice(j, 0, r);
+  disegna(); salva();
+}
+function eliminaRaid(r){
+  var s = srv();
+  var n = 0;
+  F.forEach(function(x){ if(x.slice(x.indexOf("|") + 1) === r.id) n++; });
+  apriModale({titolo:"Elimino " + r.nome + "?",
+    sub: n ? ("Perdi " + n + " spunte gia' fatte.") : "Nessuna spunta da perdere.",
+    ok:"Elimina", distruttivo:true, onOk:function(){
+      s.raid = s.raid.filter(function(x){ return x.id !== r.id; });
+      Array.from(F).forEach(function(x){ if(x.slice(x.indexOf("|") + 1) === r.id) F["delete"](x); });
+      versaF(); disegna(); salva();
+    }});
+}
+
+var NOTA_PW = "La password viene salvata in chiaro dentro la board, come il resto dei dati. " +
+              "Chi apre questa pagina puo' leggerla premendo l'occhio.";
+
+function nuovoAccount(){
+  var s = srv();
+  apriModale({titolo:"Nuovo account",
+    campi:[{chiave:"nome", etichetta:"Nome account", placeholder:"per esempio OmegaMage"},
+           {chiave:"classe", etichetta:"Classe o ruolo", placeholder:"per esempio DD"},
+           {chiave:"pw", etichetta:"Password (se la vuoi tenere qui)", placeholder:"puoi lasciarla vuota"}],
+    nota:NOTA_PW, permettiVuoto:true, ok:"Crea", onOk:function(v){
+      if(!v.nome) return;
+      s.account.push({id:nid("ac"), nome:v.nome, classe:v.classe || "", pw:v.pw || "", pg:[]});
+      modifica = true; disegna(); salva();
+    }});
+}
+function rinominaAccount(a){
+  apriModale({titolo:"Account",
+    campi:[{chiave:"nome", etichetta:"Nome account", valore:a.nome},
+           {chiave:"classe", etichetta:"Classe o ruolo", valore:a.classe || ""},
+           {chiave:"pw", etichetta:"Password (se la vuoi tenere qui)", valore:a.pw || "",
+            placeholder:"vuota = nessuna password"}],
+    nota:NOTA_PW, permettiVuoto:true,
+    elimina:function(){ eliminaAccount(a); },
+    onOk:function(v){
+      if(v.nome) a.nome = v.nome;
+      a.classe = v.classe || "";
+      a.pw = v.pw || "";
+      disegna(); salva();
+    }});
+}
+function eliminaAccount(a){
+  var s = srv();
+  apriModale({titolo:"Elimino " + a.nome + "?",
+    sub:"Spariscono i suoi " + a.pg.length + " personaggi e le loro spunte.",
+    ok:"Elimina", distruttivo:true, onOk:function(){
+      var ids = {};
+      a.pg.forEach(function(p){ ids[p.id] = true; });
+      s.account = s.account.filter(function(x){ return x.id !== a.id; });
+      Array.from(F).forEach(function(x){ if(ids[x.slice(0, x.indexOf("|"))]) F["delete"](x); });
+      versaF(); disegna(); salva();
+    }});
+}
+
+function nuovoPg(a){
+  apriModale({titolo:"Nuovo personaggio", sub:"Dentro l'account " + a.nome + ".",
+    campi:[{chiave:"nome", etichetta:"Nome del personaggio"}], ok:"Crea", onOk:function(v){
+      a.pg.push({id:nid("pg"), nome:v.nome});
+      disegna(); salva();
+    }});
+}
+function rinominaPg(a, p){
+  apriModale({titolo:"Personaggio",
+    campi:[{chiave:"nome", etichetta:"Nome", valore:p.nome}],
+    elimina:function(){ eliminaPg(a, p); },
+    onOk:function(v){
+      p.nome = v.nome; disegna(); salva();
+    }});
+}
+function eliminaPg(a, p){
+  var n = 0;
+  F.forEach(function(x){ if(x.slice(0, x.indexOf("|")) === p.id) n++; });
+  apriModale({titolo:"Elimino " + p.nome + "?",
+    sub: n ? ("Perdi " + n + " spunte gia' fatte.") : "Non ha spunte.",
+    ok:"Elimina", distruttivo:true, onOk:function(){
+      a.pg = a.pg.filter(function(x){ return x.id !== p.id; });
+      Array.from(F).forEach(function(x){ if(x.slice(0, x.indexOf("|")) === p.id) F["delete"](x); });
+      versaF(); disegna(); salva();
+    }});
+}
+
+/* ============================ salvataggio ============================ */
+var api = null, attesa = null, inCorso = false, tentativi = 0, salvatoIl = null;
+
+function segnala(s, testo){
+  if(!nodoStato) return;
+  if(s) nodoStato.setAttribute("data-s", s); else nodoStato.removeAttribute("data-s");
+  nodoStatoTesto.textContent = testo;
+}
+function orario(iso){
+  var d = new Date(iso);
+  if(isNaN(d)) return "";
+  function du(n){ return (n < 10 ? "0" : "") + n; }
+  return du(d.getDate()) + "/" + du(d.getMonth()+1) + " " + du(d.getHours()) + ":" + du(d.getMinutes());
+}
+function mostraAvviso(titolo, corpo){
+  if(!nodoAvviso) return;
+  nodoAvviso.textContent = "";
+  nodoAvviso.appendChild(el("b", {testo:titolo}));
+  nodoAvviso.appendChild(el("span", {testo:corpo}));
+  nodoAvviso.hidden = false;
+}
+
+function scriviLocale(){
+  try{
+    localStorage.setItem(CHIAVE, JSON.stringify(M));
+    salvatoIl = new Date().toISOString();
+    segnala(null, "Salvato qui " + orario(salvatoIl));
+    return true;
+  }catch(e){
+    segnala("errore", "Non salvato");
+    mostraAvviso("Questo browser non tiene la memoria della pagina.",
+      "Succede in navigazione anonima o con i cookie bloccati. Le modifiche valgono finche' " +
+      "la pagina resta aperta: usa Salva copia prima di chiuderla.");
+    return false;
+  }
+}
+
+function sorgentePagina(){
+  var css = document.getElementById("stile").textContent;
+  var js = document.getElementById("codice").textContent;
+  var dati = JSON.stringify(M);
+  var chiudi = "<" + "/script>";
+  return '<!doctype html>\n<html lang="it">\n<head>\n<meta charset="utf-8">\n' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+    '<meta name="color-scheme" content="dark">\n' +
+    '<title>Alyon Vault L2</title>\n' +
+    '<style id="stile">' + css + '</style>\n</head>\n<body>\n' +
+    '<div id="app"></div>\n' +
+    '<input type="file" id="fileIn" accept="application/json,.json" hidden>\n' +
+    '<script id="dati" type="application/json">' + dati + chiudi + '\n' +
+    '<script id="codice">' + js + chiudi + '\n' +
+    '</body>\n</html>';
+}
+
+function salva(){
+  if(modo === "locale"){ scriviLocale(); return; }
+  tentativi = 0;
+  segnala("attesa", "Da salvare");
+  clearTimeout(attesa);
+  attesa = setTimeout(pubblica, 1400);
+}
+
+function pubblica(){
+  if(modo !== "online" || !api || inCorso) return;
+  inCorso = true;
+  segnala("corso", "Salvo...");
+  try{ sessionStorage.setItem("rb-scroll", String(window.scrollY)); }catch(e){}
+
+  api.publish(sorgentePagina()).then(function(){
+    /* la vista si ricarica sulla nuova versione */
+  })["catch"](function(err){
+    inCorso = false;
+    var c = (err && err.code) || "upstream_error";
+    if(c === "conflict"){ segnala("corso", "Aggiorno..."); return; }
+    if(c === "not_writer" || c === "not_granted" || c === "not_declared" ||
+       c === "capability_disabled" || c === "capability_removed" || c === "consent_required"){
+      modo = "locale"; scriviLocale();
+      mostraAvviso("Questa copia non puo' riscriversi.",
+        "Passo a salvare nel browser di questo dispositivo. Usa Salva copia per portare i dati altrove.");
+      return;
+    }
+    if(c === "rate_limited" && tentativi < 2){
+      tentativi++; segnala("attesa", "Rallento...");
+      clearTimeout(attesa); attesa = setTimeout(pubblica, 9000); return;
+    }
+    if(c === "upstream_error" && tentativi < 2){
+      tentativi++; segnala("attesa", "Riprovo...");
+      clearTimeout(attesa); attesa = setTimeout(pubblica, 2500 + Math.random()*2500); return;
+    }
+    segnala("errore", "Non salvato");
+    mostraAvviso("L'ultima modifica non e' stata salvata.",
+      "Quello che vedi e' giusto ma non ancora scritto. Tocca una casella due volte per riprovare.");
+  });
+}
+
+/* ============================ copia su file ============================ */
+function esporta(){
+  var d = new Date();
+  function du(n){ return (n < 10 ? "0" : "") + n; }
+  var nome = "raid-board-" + d.getFullYear() + du(d.getMonth()+1) + du(d.getDate()) + ".json";
+  var testo = JSON.stringify(M, null, 1);
+
+  /* Online il file passa dal visore, che chiede conferma prima di consegnarlo.
+     Il collegamento diretto li' non funziona: vale solo per la copia locale. */
+  if(modo === "online" && typeof claude !== "undefined" && claude && typeof claude.use === "function"){
+    claude.use("downloads").then(function(ns){
+      if(!ns){
+        mostraAvviso("Da qui non posso consegnarti il file.",
+          "Questa vista non permette i salvataggi. Apri la copia locale della board per esportare i dati.");
+        return null;
+      }
+      return ns.save({filename:nome, data:testo});
+    })["catch"](function(err){
+      var c = (err && err.code) || "unavailable";
+      if(c === "declined") return;
+      if(c === "rate_limited"){
+        mostraAvviso("C'e' gia' un salvataggio aperto.", "Rispondi a quello, poi riprova.");
+        return;
+      }
+      mostraAvviso("Il file non e' stato consegnato.",
+        "Riprova fra un attimo. Se insiste, esporta dalla copia locale della board.");
+    });
+    return;
+  }
+
+  scaricaDiretto(nome, testo);
+}
+
+function scaricaDiretto(nome, testo){
+  var url = URL.createObjectURL(new Blob([testo], {type:"application/json"}));
+  var a = document.createElement("a");
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+
+document.getElementById("fileIn").addEventListener("change", function(ev){
+  var f = ev.target.files && ev.target.files[0];
+  ev.target.value = "";
+  if(!f) return;
+  var lettore = new FileReader();
+  lettore.onload = function(){
+    var o = null;
+    try{ o = JSON.parse(String(lettore.result)); }catch(e){}
+    if(!valido(o)){
+      mostraAvviso("Questo file non e' una copia della board.",
+        "Serve un raid-board-....json creato da Salva copia.");
+      return;
+    }
+    M = o; caricaF(); modifica = false; disegna(); salva();
+  };
+  lettore.readAsText(f);
+});
+
+/* ============================ avvio ============================ */
+(function avvia(){
+  var seme = daScriptDati();
+
+  function parti(){
+    if(!M) M = seme || modelloVuoto();
+    caricaF();
+    disegna();
+    try{
+      var y = sessionStorage.getItem("rb-scroll");
+      if(y){ sessionStorage.removeItem("rb-scroll"); window.scrollTo(0, parseInt(y,10) || 0); }
+    }catch(e){}
+  }
+
+  if(typeof claude !== "undefined" && claude && typeof claude.use === "function"){
+    claude.use("artifact").then(function(ns){
+      if(ns){ modo = "online"; api = ns; M = seme || modelloVuoto(); parti(); segnala(null,"Salvato"); }
+      else { avvioLocale(seme, parti); }
+    })["catch"](function(){ avvioLocale(seme, parti); });
+  }else{
+    avvioLocale(seme, parti);
+  }
+})();
+
+function avvioLocale(seme, parti){
+  modo = "locale";
+  var salvato = null;
+  try{
+    var g = localStorage.getItem(CHIAVE);
+    if(g){ var o = JSON.parse(g); if(valido(o)) salvato = o; }
+  }catch(e){}
+  if(!salvato && seme) salvato = migraVecchio(JSON.parse(JSON.stringify(seme)));
+  M = salvato || seme || modelloVuoto();
+  parti();
+  if(salvato) segnala(null, "Salvato qui");
+}
+
+})();
+</script>
+<script>
+/* Registra il guardiano che tiene l'app in memoria e la aggiorna da sola. */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+</script>
+
+</body>
+</html>
