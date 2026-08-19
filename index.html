@@ -1127,26 +1127,50 @@ document.getElementById("fileIn").addEventListener("change", function(ev){
     }catch(e){}
   }
 
-  /* Dentro l'eseguibile: aspetto che il ponte con l'app sia pronto. */
+  /* Dentro l'eseguibile. Regola: disegnare SUBITO e non restare mai in attesa
+     davanti a uno schermo vuoto. Prima si mostra l'app, poi si va a prendere
+     l'archivio; se il ponte non risponde, si dice invece di tacere. */
   if(window.__DENTRO_APP__){
     modo = "app";
+    M = seme || modelloVuoto();
+    parti();
+    segnala("attesa", "Apro l'archivio...");
+
+    var risolto = false;
     var pronto = function(){
+      if(risolto) return;
+      risolto = true;
       window.pywebview.api.carica().then(function(testo){
         var o = null;
         try{ if(testo) o = JSON.parse(testo); }catch(e){}
-        M = valido(o) ? o : (seme || modelloVuoto());
-        parti();
-        segnala(null, o ? "Salvato nel file" : "Nuovo archivio");
+        if(valido(o)){ M = o; caricaF(); disegna(); segnala(null, "Salvato nel file"); }
+        else if(testo){
+          segnala("errore", "Archivio illeggibile");
+          mostraAvviso("Il file dei dati non si legge.",
+            "Non ho toccato niente: il file e' ancora li'. Non salvare nulla, cosi' resta " +
+            "recuperabile, e usa Carica copia se hai un backup.");
+        }else{
+          segnala(null, "Nuovo archivio");
+        }
       })["catch"](function(){
-        M = seme || modelloVuoto();
-        parti();
+        segnala("errore", "Archivio non letto");
         mostraAvviso("Non riesco a leggere il file dei dati.",
-          "Riparto da vuoto. Se avevi gia' dei dati, non salvare nulla e chiedi aiuto: " +
-          "il file potrebbe essere ancora recuperabile.");
+          "Quello che vedi e' vuoto ma il file non e' stato toccato. Chiudi senza salvare.");
       });
     };
+
     if(window.pywebview && window.pywebview.api) pronto();
     else window.addEventListener("pywebviewready", pronto);
+
+    /* Se il ponte non arriva, meglio un avviso che una finestra morta. */
+    setTimeout(function(){
+      if(risolto) return;
+      risolto = true;
+      segnala("errore", "Non collegato");
+      mostraAvviso("L'app non risponde alla pagina.",
+        "Puoi guardare, ma niente verra' salvato. Chiudi e riapri; se ricapita, " +
+        "usa la versione HTML mentre sistemiamo l'eseguibile.");
+    }, 10000);
     return;
   }
 

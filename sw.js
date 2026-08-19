@@ -2,7 +2,7 @@
    Tiene una copia locale di tutto, cosi' l'app parte anche senza rete,
    e va comunque a chiedere la versione nuova quando la rete c'e'. */
 
-var VERSIONE = "v3";
+var VERSIONE = "v4";
 var CACHE = "alyon-vault-" + VERSIONE;
 
 var RISORSE = [
