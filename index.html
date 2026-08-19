@@ -626,12 +626,16 @@ function disegna(){
   }
 
   /* --- piede --- */
-  pagina.appendChild(el("div", {"class":"piede"}, [
-    el("p", {testo: modo === "online"
+  var spiega = modo === "app"
+    ? "Tutto sta nel file AlyonVault.dati, accanto all'app. Sposta i due insieme e ti porti dietro tutto."
+    : (modo === "online"
       ? "Questa board vive online: le spunte si salvano nella pagina e le ritrovi da qualsiasi dispositivo."
-      : "Questa copia e' locale: le spunte restano nel browser di questo dispositivo. Usa Salva copia per portarle altrove."}),
+      : "Questa copia e' locale: le spunte restano nel browser di questo dispositivo. Usa Salva copia per portarle altrove.");
+
+  pagina.appendChild(el("div", {"class":"piede"}, [
+    el("p", {testo:spiega}),
     bott("btn mini", "Salva copia", esporta),
-    bott("btn mini", "Carica copia", function(){ document.getElementById("fileIn").click(); })
+    bott("btn mini", "Carica copia", apriCopia)
   ]));
 
   app.appendChild(pagina);
@@ -964,11 +968,32 @@ function sorgentePagina(){
 }
 
 function salva(){
+  if(modo === "app"){ scriviApp(); return; }
   if(modo === "locale"){ scriviLocale(); return; }
   tentativi = 0;
   segnala("attesa", "Da salvare");
   clearTimeout(attesa);
   attesa = setTimeout(pubblica, 1400);
+}
+
+/* Dentro l'eseguibile i dati vanno in un file vero, accanto all'app. */
+function scriviApp(){
+  window.pywebview.api.salva(JSON.stringify(M)).then(function(r){
+    if(r && r.ok){
+      salvatoIl = new Date().toISOString();
+      segnala(null, "Salvato " + orario(salvatoIl));
+      nodoAvviso.hidden = true;
+    }else{
+      segnala("errore", "Non salvato");
+      mostraAvviso("Non riesco a scrivere il file dei dati.",
+        (r && r.errore ? r.errore + " " : "") +
+        "Di solito succede se l'app sta in una cartella protetta: spostala sul Desktop " +
+        "o in Documenti e riprova.");
+    }
+  })["catch"](function(){
+    segnala("errore", "Non salvato");
+    mostraAvviso("Il salvataggio non ha risposto.", "Prova a chiudere e riaprire l'app.");
+  });
 }
 
 function pubblica(){
@@ -1011,6 +1036,16 @@ function esporta(){
   var nome = "raid-board-" + d.getFullYear() + du(d.getMonth()+1) + du(d.getDate()) + ".json";
   var testo = JSON.stringify(M, null, 1);
 
+  /* Dentro l'eseguibile la copia la scrive l'app, con la finestra di Windows. */
+  if(modo === "app"){
+    window.pywebview.api.esporta(nome, testo).then(function(r){
+      if(r && r.ok) mostraAvviso("Copia salvata.", r.dove);
+      else if(r && r.annullato) return;
+      else mostraAvviso("Copia non salvata.", (r && r.errore) || "Riprova.");
+    })["catch"](function(){ mostraAvviso("Copia non salvata.", "Riprova."); });
+    return;
+  }
+
   /* Online il file passa dal visore, che chiede conferma prima di consegnarlo.
      Il collegamento diretto li' non funziona: vale solo per la copia locale. */
   if(modo === "online" && typeof claude !== "undefined" && claude && typeof claude.use === "function"){
@@ -1045,21 +1080,36 @@ function scaricaDiretto(nome, testo){
   setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
 }
 
+function applicaCopia(testo){
+  var o = null;
+  try{ o = JSON.parse(String(testo)); }catch(e){}
+  if(!valido(o)){
+    mostraAvviso("Questo file non e' una copia della board.",
+      "Serve un raid-board-....json creato da Salva copia.");
+    return;
+  }
+  M = o; caricaF(); modifica = false; disegna(); salva();
+}
+
+function apriCopia(){
+  /* Dentro l'eseguibile si usa la finestra di Windows, non quella del browser. */
+  if(modo === "app"){
+    window.pywebview.api.importa().then(function(r){
+      if(!r || r.annullato) return;
+      if(!r.ok){ mostraAvviso("Non riesco a leggere quel file.", r.errore || ""); return; }
+      applicaCopia(r.testo);
+    })["catch"](function(){ mostraAvviso("Non riesco a leggere quel file.", "Riprova."); });
+    return;
+  }
+  document.getElementById("fileIn").click();
+}
+
 document.getElementById("fileIn").addEventListener("change", function(ev){
   var f = ev.target.files && ev.target.files[0];
   ev.target.value = "";
   if(!f) return;
   var lettore = new FileReader();
-  lettore.onload = function(){
-    var o = null;
-    try{ o = JSON.parse(String(lettore.result)); }catch(e){}
-    if(!valido(o)){
-      mostraAvviso("Questo file non e' una copia della board.",
-        "Serve un raid-board-....json creato da Salva copia.");
-      return;
-    }
-    M = o; caricaF(); modifica = false; disegna(); salva();
-  };
+  lettore.onload = function(){ applicaCopia(lettore.result); };
   lettore.readAsText(f);
 });
 
@@ -1075,6 +1125,29 @@ document.getElementById("fileIn").addEventListener("change", function(ev){
       var y = sessionStorage.getItem("rb-scroll");
       if(y){ sessionStorage.removeItem("rb-scroll"); window.scrollTo(0, parseInt(y,10) || 0); }
     }catch(e){}
+  }
+
+  /* Dentro l'eseguibile: aspetto che il ponte con l'app sia pronto. */
+  if(window.__DENTRO_APP__){
+    modo = "app";
+    var pronto = function(){
+      window.pywebview.api.carica().then(function(testo){
+        var o = null;
+        try{ if(testo) o = JSON.parse(testo); }catch(e){}
+        M = valido(o) ? o : (seme || modelloVuoto());
+        parti();
+        segnala(null, o ? "Salvato nel file" : "Nuovo archivio");
+      })["catch"](function(){
+        M = seme || modelloVuoto();
+        parti();
+        mostraAvviso("Non riesco a leggere il file dei dati.",
+          "Riparto da vuoto. Se avevi gia' dei dati, non salvare nulla e chiedi aiuto: " +
+          "il file potrebbe essere ancora recuperabile.");
+      });
+    };
+    if(window.pywebview && window.pywebview.api) pronto();
+    else window.addEventListener("pywebviewready", pronto);
+    return;
   }
 
   if(typeof claude !== "undefined" && claude && typeof claude.use === "function"){
